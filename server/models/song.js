@@ -10,7 +10,7 @@ const SongSchema = new Schema({
   lyrics: [{
     type: Schema.Types.ObjectId,
     ref: 'lyric'
-  }]
+  }],
 });
 
 SongSchema.statics.addLyric = function(id, content) {
