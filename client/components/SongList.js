@@ -1,13 +1,24 @@
 import React, { Component } from 'react';
-import gql from 'graphql-tag';
+import { Link } from 'react-router';
 import { graphql } from 'react-apollo';
+import fetchSongs from '../queries/fetchSongs';
+import deleteSong from '../queries/deleteSong';
 
 class SongList extends Component {
+  onSongDelete(id) {
+    this.props.mutate({
+      variables: { id }
+    }).then(() => this.props.data.refetch()); //this.props.data is automatically added by graphql
+    // refetch method for the component itself
+  }
   renderSongs() {
-    return this.props.data.songs.map(song => {
+    return this.props.data.songs.map(({id, title}) => {
       return (
-        <li key={song.id} className="collection-item">
-          {song.title}
+        <li key={id} className="collection-item">
+          {title}
+          <i
+            className="material-icons"
+            onClick={() => this.onSongDelete(id)}>delete</i>
         </li>
       );
     });
@@ -17,19 +28,21 @@ class SongList extends Component {
     // apollo-react automatically rerenders when query is refreshed.
     console.log(this.props); // shows new query info when rerenders
 
-    return (<div>
-      { this.renderSongs() }
-    </div>);
+    return (
+    <div>
+      <ul className="collection">
+        { this.renderSongs() }
+      </ul>
+      <Link
+        to="/songs/new"
+        className="btn-floating btn-large red right">
+        <i className="material-icons">add</i>
+      </Link>
+    </div>
+    );
   }
 }
 
-const query = gql`
-  {
-    songs {
-      id
-      title
-    }
-  }
-`;
-
-export default graphql(query)(SongList);
+export default graphql(deleteSong)(
+  graphql(fetchSongs)(SongList)
+);
